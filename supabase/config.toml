@@ -1,0 +1,5 @@
+[functions.rexpn-api]
+verify_jwt = false
+entrypoint = "./functions/rexpn-api/index.js"
+# The function implements its own authorization: validated Supabase instructor
+# access tokens or hashed server-side REx-PN student sessions.

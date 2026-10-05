@@ -1,0 +1,1 @@
+window.REX_CONFIG={apiUrl:'https://glkxtkaaztmfgffrleuv.supabase.co/functions/v1/rexpn-api',supabaseUrl:'https://glkxtkaaztmfgffrleuv.supabase.co',publicKey:'sb_publishable_aoQbbfHbahkNWbiY5-Tuwg_A8YPr5F8'};
