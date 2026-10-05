@@ -1,3 +1,15 @@
+# Claire’s REx-PN Practice
+
+## Full version with student accounts
+
+The complete login-enabled application is in [full-site/](full-site/). It includes assigned student accounts, a separate instructor password login, saved attempts, server scoring, instructor tracking and downloadable activity logs. See [setup instructions](full-site/README.md).
+
+GitHub stores the source. Deploy `full-site/` to Cloudflare Workers with a D1 database to run these features. This source transfer does not migrate existing student accounts or records and does not change the original hosted website. The repository is public; never commit credentials or student records. The educational answer bank is visible in source.
+
+The repository root retains the original static GitHub Pages comparison version described below.
+
+---
+
 # Claire’s REx-PN Practice: GitHub Pages comparison
 
 Created for Claire Song. This standalone version includes 10 strategy lessons with tip checks, 10 sets of six original questions, a 60-question timed mock using the same bank, answer rationales, category scores, device-local history, and downloadable result reports.

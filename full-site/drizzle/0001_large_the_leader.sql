@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `attempts_one_active_per_student` ON `attempts` (`student_id`) WHERE "attempts"."status" = 'started';
