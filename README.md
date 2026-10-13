@@ -35,3 +35,14 @@ Security advisor information about RLS tables having no policies is intentional 
 ## Educational limits
 
 Original draft teaching materials: ten lessons, ten six-question sets and a 60-question mock that reuses the practice bank. Faculty review is needed before classroom use. The 70% practice benchmark is not an official passing score or a validated readiness estimate. Independent resource, not endorsed by NCSBN or BCCNM.
+
+
+## Additional mock exams (October 13, 2026)
+
+The Mock exam tab now offers Foundation, Applied Practice and Clinical Challenge, each with 40 new original single-best-answer questions and a 60-minute teaching timer. The three forms contain 120 new IDs, distinct from the 60 original practice items. Difficulty describes intended reasoning demands; it has not been empirically calibrated. Short forms approximate the revised 2022 eight-category content distribution: 8 management, 5 safety, 4 health promotion, 5 psychosocial, 4 basic care, 7 pharmacology, 4 risk reduction and 3 physiological adaptation items per form. Rounded category percentages differ from the official proportions because each form contains only 40 items.
+
+The new bank is in `supabase/functions/rexpn-api/mocks.js`. Existing attempts retain their stored question IDs; the previous keys and legacy 60-question mock remain unchanged. New forms use the same assigned login, server-side answer locking, saved attempts, category review, rationales, instructor dashboard and CSV exports. No database migration was required.
+
+The official January 2026 SATA partial-credit change is disclosed in Sources. The legacy bank still uses exact-match teaching scores; the new forms use single-best-answer items. These are shortened fixed-length educational forms, not official items, full-length simulations, CAT, or validated pass predictors. Clinical references are attached; faculty review of content, keys and local scope/policy is needed before high-stakes use. Calculation doses and rates are fictional arithmetic exercises.
+
+Automated integration and UI checks covered mock selection, all 120 IDs, timers, saved/resumed answers, locked answers, scoring, category counts, review and instructor access, while preserving the original practice sets and mock. Live Supabase checks used temporary verification accounts, removed after verification. A real browser instructor sign-in was not performed.

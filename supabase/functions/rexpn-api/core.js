@@ -1,3 +1,4 @@
+import {mockExams,mockSources} from './mocks.js';
 const BANK={
   "sources": {
     "consent": [
@@ -1181,7 +1182,7 @@ function requireUser(user){if(!user)fail(401,'Please sign in.');if(user.role==='
 function requireInstructor(user){if(user?.role!=='instructor')fail(403,'Instructor access is required.')}
 async function log(env,studentId,actor,event,detail,id=uid()){await stmt(env,'INSERT OR IGNORE INTO activity (id,student_id,actor,event,detail,created_at) VALUES (?,?,?,?,?,?)',id,studentId,actor,event,detail,Date.now()).run()}
 function publicUser(user){if(!user)return null;return {id:user.id,role:user.role,name:user.name,username:user.username,mustChange:!!user.mustChange}}
-const keyed=id=>BANK.sets.flatMap(s=>s.questions).find(q=>q.id===id);
+const keyed=id=>[...BANK.sets.flatMap(s=>s.questions),...mockExams.flatMap(s=>s.questions)].find(q=>q.id===id);
 function questions(attempt,review=false){return JSON.parse(attempt.question_ids).map(id=>{const q=keyed(id);if(!q)fail(500,'A question is unavailable.');if(review)return q;const {answer,rationale,...safe}=q;return safe})}
 function result(attempt){return {id:attempt.id,name:attempt.name,set:attempt.set_number,mock:!!attempt.mock,index:attempt.current_index,questions:questions(attempt,attempt.status!=='started'),answers:JSON.parse(attempt.answers),started:attempt.started_at,deadline:attempt.deadline,finished:attempt.finished_at,correct:attempt.correct,total:attempt.total,percent:attempt.percent,met:attempt.correct/attempt.total>=.7,status:attempt.status}}
 function matching(a,b){return [...a].sort((x,y)=>x-y).join(',')===[...b].sort((x,y)=>x-y).join(',')}
@@ -1217,7 +1218,7 @@ async function handle(request,env){const url=new URL(request.url),path=url.pathn
  }
  if(path.startsWith('/api/admin')){
   requireInstructor(user);
-  if(path==='/api/admin/bank')return json(BANK,200,{'Content-Disposition':'attachment; filename="Claire-REx-PN-question-bank.json"'});
+  if(path==='/api/admin/bank')return json({...BANK,sources:{...BANK.sources,...mockSources},mocks:mockExams},200,{'Content-Disposition':'attachment; filename="Claire-REx-PN-question-bank.json"'});
   if(path==='/api/admin/overview'){
    // Expired mocks are reconciled when an instructor loads the dashboard.
    for(const a of await all(env,"SELECT * FROM attempts WHERE status='started' AND deadline IS NOT NULL AND deadline<=?",Date.now()))await expire(env,a);
@@ -1246,12 +1247,12 @@ async function handle(request,env){const url=new URL(request.url),path=url.pathn
   }
   fail(404,'Instructor action not found');
  }
- if(path==='/api/bank'){requireUser(user);return json({sources:BANK.sources,sets:BANK.sets.map(s=>({...s,questions:s.questions.map(({answer,rationale,...q})=>q)}))})}
+ if(path==='/api/bank'){requireUser(user);return json({sources:{...BANK.sources,...mockSources},mocks:mockExams.map(({questions,...metadata})=>({...metadata,count:questions.length})),sets:BANK.sets.map(s=>({...s,questions:s.questions.map(({answer,rationale,...q})=>q)}))})}
  if(path==='/api/attempts'&&method==='GET'){requireUser(user);if(user.role!=='student')return json({attempts:[]});return json({attempts:await studentAttempts(env,user.id)})}
  if(path==='/api/attempts'&&method==='POST'){
   requireUser(user);if(user.role!=='student')fail(403,'Use a student account to record a practice attempt.');const b=await body(request);const prior=await get(env,"SELECT * FROM attempts WHERE student_id=? AND status='started' ORDER BY started_at DESC LIMIT 1",user.id);if(prior&&(await expire(env,prior)).status==='started')return json({attempt:result(prior),resumed:true});
-  let ids,name,setNumber=null,mock=false;if(b.mock===true){ids=shuffled(BANK.sets.flatMap(s=>s.questions.map(q=>q.id)));name='60-question mock';mock=true}else if(Number.isInteger(b.set)&&b.set>=0&&b.set<10){setNumber=b.set;const s=BANK.sets[b.set];ids=s.questions.map(q=>q.id);name=`Set ${b.set+1}: ${s.title}`}else fail(400,'Choose a valid practice set or mock');
-  const id=uid(),now=Date.now();await db(env).batch([stmt(env,'INSERT INTO attempts (id,student_id,name,set_number,mock,question_ids,answers,current_index,status,started_at,updated_at,deadline,total) VALUES (?,?,?,?,?,?,?,0,\'started\',?,?,?,?)',id,user.id,name,setNumber,mock?1:0,JSON.stringify(ids),'[]',now,now,mock?now+5400000:null,ids.length),stmt(env,'INSERT INTO activity (id,student_id,actor,event,detail,created_at) VALUES (?,?,?,?,?,?)',id+':started',user.id,user.id,'attempt_started',name,now)]);return json({attempt:result(await get(env,'SELECT * FROM attempts WHERE id=?',id))},201);
+  let ids,name,setNumber=null,mock=false,duration=5400000;if(b.mockId){const exam=mockExams.find(m=>m.id===b.mockId);if(!exam)fail(400,'Choose a valid mock exam.');ids=shuffled(exam.questions.map(q=>q.id));name=exam.title+' · '+exam.difficulty+' · v'+exam.version;duration=exam.minutes*60000;mock=true}else if(b.mock===true){ids=shuffled(BANK.sets.flatMap(s=>s.questions.map(q=>q.id)));name='60-question mock';mock=true}else if(Number.isInteger(b.set)&&b.set>=0&&b.set<10){setNumber=b.set;const s=BANK.sets[b.set];ids=s.questions.map(q=>q.id);name=`Set ${b.set+1}: ${s.title}`}else fail(400,'Choose a valid practice set or mock');
+  const id=uid(),now=Date.now();await db(env).batch([stmt(env,'INSERT INTO attempts (id,student_id,name,set_number,mock,question_ids,answers,current_index,status,started_at,updated_at,deadline,total) VALUES (?,?,?,?,?,?,?,0,\'started\',?,?,?,?)',id,user.id,name,setNumber,mock?1:0,JSON.stringify(ids),'[]',now,now,mock?now+duration:null,ids.length),stmt(env,'INSERT INTO activity (id,student_id,actor,event,detail,created_at) VALUES (?,?,?,?,?,?)',id+':started',user.id,user.id,'attempt_started',name,now)]);return json({attempt:result(await get(env,'SELECT * FROM attempts WHERE id=?',id))},201);
  }
  const answerMatch=path.match(/^\/api\/attempts\/([^/]+)\/(answer|status)$/);
  if(answerMatch){requireUser(user);let a=await get(env,'SELECT * FROM attempts WHERE id=? AND student_id=?',answerMatch[1],user.id);if(!a)fail(404,'Attempt not found');a=await expire(env,a);if(answerMatch[2]==='status')return json({attempt:result(a)});if(method!=='POST')fail(405,'Submit an answer with POST');if(a.status!=='started')return json({attempt:result(a)});
@@ -1265,3 +1266,4 @@ async function handle(request,env){const url=new URL(request.url),path=url.pathn
  const asset=ASSETS[path==='/'||path==='/instructor'?'/index.html':path];if(!asset)fail(404,'Page not found');return new Response(asset.body,{headers:{...securityHeaders,'Content-Type':asset.type,'Cache-Control':'no-cache'}});
 }
 export default {async fetch(request,env){try{return await handle(request,env)}catch(e){if(!(e instanceof HttpError))console.error('Class record request failed',{path:new URL(request.url).pathname,message:e.message});return json({error:e instanceof HttpError?e.message:'The class record could not be loaded or saved. Your current selection is unchanged. Please try again.'},e.status||503)}}};
+
