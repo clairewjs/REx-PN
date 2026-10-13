@@ -1,5 +1,6 @@
+import {additionalMocks,additionalSources} from './extra-mocks.js';
 // Original draft teaching questions; difficulty labels are editorial, not calibrated.
-export const mockExams=[
+const originalMockExams=[
   {
     "id": "rex-mock-foundation-v1",
     "title": "Mock 1: Foundation",
@@ -2071,7 +2072,7 @@ export const mockExams=[
     ]
   }
 ];
-export const mockSources={
+const originalMockSources={
   "mock-plan": [
     "NCSBN: revised 2022 REx-PN content framework",
     "https://www.rexpn.com/files/2025_RexPN-Update.pdf"
@@ -2129,3 +2130,7 @@ export const mockSources={
     "https://www.nimh.nih.gov/health/publications/warning-signs-of-suicide"
   ]
 };
+
+
+export const mockExams=[...originalMockExams,...additionalMocks];
+export const mockSources={...originalMockSources,...additionalSources};

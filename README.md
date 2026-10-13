@@ -46,3 +46,10 @@ The new bank is in `supabase/functions/rexpn-api/mocks.js`. Existing attempts re
 The official January 2026 SATA partial-credit change is disclosed in Sources. The legacy bank still uses exact-match teaching scores; the new forms use single-best-answer items. These are shortened fixed-length educational forms, not official items, full-length simulations, CAT, or validated pass predictors. Clinical references are attached; faculty review of content, keys and local scope/policy is needed before high-stakes use. Calculation doses and rates are fictional arithmetic exercises.
 
 Automated integration and UI checks covered mock selection, all 120 IDs, timers, saved/resumed answers, locked answers, scoring, category counts, review and instructor access, while preserving the original practice sets and mock. Live Supabase checks used temporary verification accounts, removed after verification. A real browser instructor sign-in was not performed.
+
+
+## Five more mock forms
+
+Mocks 4–8 add Safety Foundations (Foundation), Everyday Practice (Standard), Clinical Decisions (Intermediate), Priorities & Escalation (Advanced), and Integrated Care (Advanced Integration). Each includes 40 original questions and a 60-minute timer, for 200 additions. There are now eight distinct 40-question forms, containing 320 items, plus the unchanged original 60-question practice-bank mock.
+
+The five additions are in `supabase/functions/rexpn-api/extra-mocks.js`. Each retains the same eight-category short-form distribution. Editorial difficulty labels indicate intended reasoning demands and are not calibrated performance levels. No schema or authentication changes were needed. The original three forms, question keys and IDs remain unchanged. New checks cover all eight forms' selection, 39/40 grading, save/resume, answer locking, timers and instructor review; content checks confirm 320 distinct stems and IDs, valid options/keys, rationales, references and category counts. Added clinical sources cover maternal warning signs, infant sleep, sepsis and severe allergy. Faculty review of clinical content remains appropriate.
